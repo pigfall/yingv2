@@ -60,7 +60,7 @@ func (this *transportServerUDP) Serve(ctx context.Context,tunIfce tzNet.TunIfce,
 		msgType := readData[0]
 		msgData:=readData[1:]
 		if msgType == MSG_TYPE_IP_PACKET{
-			this.handleIpPakcet(ctx,msgData,clientAddr)
+			this.handleIpPakcet(msgData,clientAddr,connsStorage)
 		}else if msgType== MSG_TYPE_APP_MSG{
 			this.handleAppMsg(ctx,msgData)
 		}else{
@@ -69,8 +69,15 @@ func (this *transportServerUDP) Serve(ctx context.Context,tunIfce tzNet.TunIfce,
 	}
 }
 
-func (this *transportServerUDP) handleIpPakcet(ctx context.Context,ipPacket []byte,clientAddr *net.UDPAddr){
-	panic("TODO")
+func (this *transportServerUDP) handleIpPakcet(ipPacket []byte,clientAddr *net.UDPAddr,connStorage ConnsStorage){
+	// TODO route by clientTunnelIp
+	allConns := connStorage.AllConns()
+	for _,conn  := range allConns{
+		err := conn.WriteIpPacket(ipPacket)
+		if err != nil{
+			log.Error(err.Error())
+		}
+	}
 }
 
 func (this *transportServerUDP) handleAppMsg(ctx context.Context,appMsg []byte){

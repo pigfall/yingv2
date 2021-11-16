@@ -17,6 +17,7 @@ type ConnsStorage interface{
 type Conn interface{
 	ClientIpPort()(ClientIpPort tzNet.IpPortFormat)
 	ClientTunnelIp() tzNet.IpFormat
+	WriteIpPacket(ipPacket []byte)error
 }
 
 type TransportServerBuilder interface{
