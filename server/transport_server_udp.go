@@ -1,6 +1,7 @@
 package server
 
 import(
+	"net"
 	"fmt"
 	"context"
 	tzNet "github.com/pigfall/tzzGoUtil/net"
@@ -46,6 +47,38 @@ jobs:
    udpReadLoop
 */
 func (this *transportServerUDP) Serve(ctx context.Context,tunIfce tzNet.TunIfce,connsStorage ConnsStorage)error{
-	panic("TODOj")
+	var udpSock = this.udpSock
+	var buf = make([]byte,1024*70)
+	for {
+		readNum,clientAddr,err := udpSock.ReadFromUDP(buf)
+		if err != nil{
+			err = fmt.Errorf("Read from udp socket failed %w",err)
+			log.Error(err.Error())
+			return err
+		}
+		readData := buf[:readNum]
+		msgType := readData[0]
+		msgData:=readData[1:]
+		if msgType == MSG_TYPE_IP_PACKET{
+			this.handleIpPakcet(ctx,msgData,clientAddr)
+		}else if msgType== MSG_TYPE_APP_MSG{
+			this.handleAppMsg(ctx,msgData)
+		}else{
+			panic(fmt.Sprintf("BUG undefined msgType %v",msgType))
+		}
+	}
 }
 
+func (this *transportServerUDP) handleIpPakcet(ctx context.Context,ipPacket []byte,clientAddr *net.UDPAddr){
+	panic("TODO")
+}
+
+func (this *transportServerUDP) handleAppMsg(ctx context.Context,appMsg []byte){
+	panic("TODO")
+}
+
+
+const(
+		MSG_TYPE_IP_PACKET=0
+ MSG_TYPE_APP_MSG= 1
+)
