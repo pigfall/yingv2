@@ -22,11 +22,12 @@ func NewConn(clientIpPort tzNet.IpPort,clientTunnelIpNet *tzNet.IpWithMask,write
 
 
 func (this *conn)	ClientIpPort()(ClientIpPort tzNet.IpPortFormat){
-	panic("TODO")
+	return this.clientIpPort.ToIpPortFormat()
 }
 func (this *conn)	ClientTunnelIpNet() tzNet.IpNetFormat{
-	panic("TODO")
+	return this.clientTunnelIpNet.ToIpNetFormat()
 }
 func (this *conn)	WriteIpPacket(ipPacket []byte)error{
-	panic("TODO")
+	_,err := this.writer.Write(ipPacket)
+	return err
 }
