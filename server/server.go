@@ -30,7 +30,6 @@ func Serve(ctx context.Context,serveIpPort *tzNet.IpPort,transportServerBuilder 
 	cancelFuncs := funcs.NewFuncs()
 	defer cancelFuncs.Call()
 
-	connsStorage := newConnStorage()
 	tunIfce,tunIpNet,err := readyTunIfce(nil)
 	if err != nil {
 		err = fmt.Errorf("Prepare tun interface failed %w",err)
@@ -47,6 +46,14 @@ func Serve(ctx context.Context,serveIpPort *tzNet.IpPort,transportServerBuilder 
 		return err
 	}
 	log.Info(fmt.Sprintf("Created tun interface %s which ipNet is %s",tunIfceName,tunIpNet.ToString()))
+
+	ipPool,err := tzNet.NewIpPool(tunIpNet,[]*tzNet.IpWithMask{tunIpNet})
+	if err != nil{
+		log.Error(err.Error())
+		return err
+	}
+	connsStorage := newConnStorage(ipPool)
+
 	asyncCtrl := async.NewCtrl()
 	asyncCtrl.OnRoutineQuit(func(jobName string){
 		cancelFuncs.Call()

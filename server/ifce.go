@@ -1,6 +1,7 @@
 package server
 
 import(
+	"io"
 	"context"
 	tzNet "github.com/pigfall/tzzGoUtil/net"
 )
@@ -12,7 +13,7 @@ type ConnsStorage interface{
 	FindConnByClientIpPort(clientIpPort tzNet.IpPortFormat)(Conn)
 	FindConnByTunnelIp(tunnIp tzNet.IpFormat)Conn
 	AllConns()[]Conn
-	AllocateConn(clientIpPort tzNet.IpPort)(Conn,error)
+	AllocateConn(clientIpPort tzNet.IpPort,connWriter io.Writer)(Conn,error)
 }
 
 type Conn interface{

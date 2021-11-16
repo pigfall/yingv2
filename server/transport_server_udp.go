@@ -1,6 +1,7 @@
 package server
 
 import(
+	"io"
 	"net"
 	"fmt"
 	"context"
@@ -91,7 +92,7 @@ func (this *transportServerUDP) handleAppMsg(clientAddr *net.UDPAddr,appMsgBytes
 		log.Error(err.Error())
 		return 
 	}
-	res :=handleUDPAppMsg(&reqMsg,connStorage,clientAddr)
+	res :=handleUDPAppMsg(&reqMsg,connStorage,clientAddr,udpSock)
 	resMsgBytes,err  := proto.Encode(res)
 	if err != nil{
 		log.Error(err.Error())
@@ -110,5 +111,21 @@ func writeToUDPClient(udpSock *tzNet.UDPSock,bytes []byte,clientAddr *net.UDPAdd
 
 const(
 		MSG_TYPE_IP_PACKET=0
- MSG_TYPE_APP_MSG= 1
+	 MSG_TYPE_APP_MSG= 1
 )
+
+type connUDPWriter struct{
+	udpSock *tzNet.UDPSock
+	remoteAddr *net.UDPAddr
+}
+
+func newConnUDPWriter(udpSock *tzNet.UDPSock,remoteAddr *net.UDPAddr)io.Writer{
+	return &connUDPWriter{
+		udpSock:udpSock,
+		remoteAddr:remoteAddr,
+	}
+}
+
+func (this *connUDPWriter) Write(b []byte)(int,error){
+	return this.udpSock.WriteToUDP(b,this.remoteAddr)
+}
