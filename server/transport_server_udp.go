@@ -6,6 +6,8 @@ import(
 	"context"
 	tzNet "github.com/pigfall/tzzGoUtil/net"
 log "github.com/pigfall/tzzGoUtil/log/golog"
+
+"github.com/pigfall/yingv2/proto"
 )
 
 type TransportUDPServerBuilder struct{
@@ -62,7 +64,7 @@ func (this *transportServerUDP) Serve(ctx context.Context,tunIfce tzNet.TunIfce,
 		if msgType == MSG_TYPE_IP_PACKET{
 			this.handleIpPakcet(msgData,clientAddr,connsStorage)
 		}else if msgType== MSG_TYPE_APP_MSG{
-			this.handleAppMsg(ctx,msgData)
+			this.handleAppMsg(clientAddr,msgData)
 		}else{
 			panic(fmt.Sprintf("BUG undefined msgType %v",msgType))
 		}
@@ -80,7 +82,27 @@ func (this *transportServerUDP) handleIpPakcet(ipPacket []byte,clientAddr *net.U
 	}
 }
 
-func (this *transportServerUDP) handleAppMsg(ctx context.Context,appMsg []byte){
+func (this *transportServerUDP) handleAppMsg(clientAddr *net.UDPAddr,appMsgBytes []byte){
+	var udpSock = this.udpSock
+	var reqMsg = proto.ReqMsg{}
+	err :=  proto.Decode(appMsgBytes,&reqMsg)
+	if err != nil{
+		log.Error(err.Error())
+		return 
+	}
+	res :=handleAppMsg()
+	resMsgBytes,err  := proto.Encode(res)
+	if err != nil{
+		log.Error(err.Error())
+		return
+	}
+	err = writeToUDPClient(udpSock,resMsgBytes,clientAddr)
+	if err != nil{
+		log.Error(err.Error())
+	}
+}
+
+func writeToUDPClient(udpSock *tzNet.UDPSock,bytes []byte,clientAddr *net.UDPAddr)(error){
 	panic("TODO")
 }
 
