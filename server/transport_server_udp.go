@@ -9,6 +9,14 @@ log "github.com/pigfall/tzzGoUtil/log/golog"
 
 type TransportUDPServerBuilder struct{
 
+}
+
+func NewTransportUDPServerBuilder()TransportServerBuilder{
+	return &TransportUDPServerBuilder{}
+}
+
+func (this *TransportUDPServerBuilder) BuildTransportServer() TransportServer{
+	return &transportServerUDP{}
 
 }
 
