@@ -12,7 +12,7 @@ tzNet "github.com/pigfall/tzzGoUtil/net"
 )
 
 var (
-		JOB_TUNIFCE_DATA_TO_CONNS = reflect.TypeOf( tunIfceDataToConns).String()
+		JOB_ON_READ_TUNIFCE = reflect.TypeOf(onReadFromTunIfce).String()
 		JOB_TRANSPORT_SERVER_SERVE = reflect.TypeOf(TransportServer.Serve).String()
 )
 
@@ -70,13 +70,13 @@ func Serve(ctx context.Context,serveIpPort *tzNet.IpPort,transportServerBuilder 
 	}()
 
 	// < readFrom tunIfce then send to all connections
-	log.Info(fmt.Sprintf("Start %s",JOB_TUNIFCE_DATA_TO_CONNS))
+	log.Info(fmt.Sprintf("Start %s",JOB_ON_READ_TUNIFCE))
 	asyncCtrl.AsyncDo(
 		ctx,
-		JOB_TUNIFCE_DATA_TO_CONNS,
+		JOB_ON_READ_TUNIFCE,
 		func(ctx context.Context){
-			err := tunIfceDataToConns(ctx,tunIfce,connsStorage)
-			log.Info(fmt.Sprintf("%s func over %v",reflect.TypeOf( tunIfceDataToConns).String(),err))
+			err := onReadFromTunIfce(ctx,tunIfce,connsStorage)
+			log.Info(fmt.Sprintf("%s func over %v",reflect.TypeOf(onReadFromTunIfce).String(),err))
 		},
 	)
 	// >
@@ -109,8 +109,9 @@ func Serve(ctx context.Context,serveIpPort *tzNet.IpPort,transportServerBuilder 
 
 
 // readFrom tunIfce then send to all connections
-func tunIfceDataToConns(ctx context.Context,tunIfce tzNet.TunIfce,connsStorage ConnsStorage)error{
+func onReadFromTunIfce(ctx context.Context,tunIfce tzNet.TunIfce,connsStorage ConnsStorage)error{
 	var buf = make([]byte,70*1024)
+	bufToSend := make([]byte,len(buf)+1)
 	for {
 		readNum,err := tunIfce.Read(buf)
 		bytesReadFromTunIfce := buf[:readNum]
@@ -119,11 +120,20 @@ func tunIfceDataToConns(ctx context.Context,tunIfce tzNet.TunIfce,connsStorage C
 			// < maybe closed? TODO
 			// return if tunIfce close
 			// now return ignore the err type
-			log.Info("Read from tun ifce failed, the loop tunIfceDataToConns returnd")
+			log.Info("Read from tun ifce failed, the loop onReadFromTunIfce returnd")
 			return err
 			// >
 		}
+		bufToSend[0] = MSG_TYPE_IP_PACKET
+		copy(bufToSend[1:],bytesReadFromTunIfce)
 		log.Debug(fmt.Sprintf("read bytes from tun interface %v",bytesReadFromTunIfce))
-		// TODO
+		// TODO route by clientTunnelIp
+		log.Info("Writing to all conns")
+		connsStorage.ForEachConn(func(conn Conn){
+			err := conn.WriteIpPacket(bufToSend)
+			if err != nil{
+				log.Error(err.Error())
+			}
+		})
 	}
 }
