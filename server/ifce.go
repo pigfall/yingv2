@@ -1,20 +1,29 @@
 package server
 
-tzNet "github.com/pigfall/tzzGoUtil/net"
+import(
+	"context"
+	tzNet "github.com/pigfall/tzzGoUtil/net"
+)
+
 
 // storage all conns
-type ConnsStoreage interface{
+type ConnsStorage interface{
 	PutConn(Conn)
-	FindConnByClientIpPort(clientIpPort )(Conn)
-	FindConnByTunnelIp(tunnIp)Conn
+	FindConnByClientIpPort(clientIpPort tzNet.IpPortFormat)(Conn)
+	FindConnByTunnelIp(tunnIp tzNet.IpFormat)Conn
 	AllConns()[]Conn
 }
 
 type Conn interface{
-	ClientIpPort() ClientIpPort
-	ClientTunnelIp() IpFormat
+	ClientIpPort()(ClientIpPort tzNet.IpPortFormat)
+	ClientTunnelIp() tzNet.IpFormat
 }
 
 type TransportServerBuilder interface{
-	BuildTransportServer() TranportServer
+	BuildTransportServer() TransportServer
+}
+
+type TransportServer interface{
+	Prepare(serverAddr *tzNet.IpPort) (cancelFuncs func(),err error)
+	Serve(ctx context.Context,tunIfce tzNet.TunIfce,connsStorage  ConnsStorage)(error)
 }
