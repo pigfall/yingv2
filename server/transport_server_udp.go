@@ -74,6 +74,7 @@ func (this *transportServerUDP) Serve(ctx context.Context,tunIfce tzNet.TunIfce,
 func (this *transportServerUDP) handleIpPakcet(ipPacket []byte,clientAddr *net.UDPAddr,connStorage ConnsStorage){
 	// TODO route by clientTunnelIp
 	allConns := connStorage.AllConns()
+	log.Info("Writing to all conns")
 	for _,conn  := range allConns{
 		err := conn.WriteIpPacket(ipPacket)
 		if err != nil{
