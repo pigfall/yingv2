@@ -21,7 +21,6 @@ func NewTransportUDPServerBuilder()TransportServerBuilder{
 
 func (this *TransportUDPServerBuilder) BuildTransportServer() TransportServer{
 	return &transportServerUDP{}
-
 }
 
 
