@@ -25,3 +25,7 @@ func(this *connsStorage)	FindConnByTunnelIp(tunnIp tzNet.IpFormat)Conn{
 func(this *connsStorage)	AllConns()[]Conn{
 	panic("TODO")
 }
+
+func (this *connsStorage) AllocateConn(clientIpPort tzNet.IpPort)(Conn,error){
+	panic("TODO")
+}

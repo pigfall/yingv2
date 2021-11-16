@@ -12,11 +12,12 @@ type ConnsStorage interface{
 	FindConnByClientIpPort(clientIpPort tzNet.IpPortFormat)(Conn)
 	FindConnByTunnelIp(tunnIp tzNet.IpFormat)Conn
 	AllConns()[]Conn
+	AllocateConn(clientIpPort tzNet.IpPort)(Conn,error)
 }
 
 type Conn interface{
 	ClientIpPort()(ClientIpPort tzNet.IpPortFormat)
-	ClientTunnelIp() tzNet.IpFormat
+	ClientTunnelIpNet() tzNet.IpNetFormat
 	WriteIpPacket(ipPacket []byte)error
 }
 

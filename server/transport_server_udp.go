@@ -64,7 +64,7 @@ func (this *transportServerUDP) Serve(ctx context.Context,tunIfce tzNet.TunIfce,
 		if msgType == MSG_TYPE_IP_PACKET{
 			this.handleIpPakcet(msgData,clientAddr,connsStorage)
 		}else if msgType== MSG_TYPE_APP_MSG{
-			this.handleAppMsg(clientAddr,msgData)
+			this.handleAppMsg(clientAddr,msgData,connsStorage)
 		}else{
 			panic(fmt.Sprintf("BUG undefined msgType %v",msgType))
 		}
@@ -83,7 +83,7 @@ func (this *transportServerUDP) handleIpPakcet(ipPacket []byte,clientAddr *net.U
 	}
 }
 
-func (this *transportServerUDP) handleAppMsg(clientAddr *net.UDPAddr,appMsgBytes []byte){
+func (this *transportServerUDP) handleAppMsg(clientAddr *net.UDPAddr,appMsgBytes []byte,connStorage ConnsStorage){
 	var udpSock = this.udpSock
 	var reqMsg = proto.ReqMsg{}
 	err :=  proto.Decode(appMsgBytes,&reqMsg)
@@ -91,7 +91,7 @@ func (this *transportServerUDP) handleAppMsg(clientAddr *net.UDPAddr,appMsgBytes
 		log.Error(err.Error())
 		return 
 	}
-	res :=handleAppMsg()
+	res :=handleUDPAppMsg(&reqMsg,connStorage,clientAddr)
 	resMsgBytes,err  := proto.Encode(res)
 	if err != nil{
 		log.Error(err.Error())
