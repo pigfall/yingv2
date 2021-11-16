@@ -9,10 +9,9 @@ import(
 
 // storage all conns
 type ConnsStorage interface{
-	PutConn(Conn)
 	FindConnByClientIpPort(clientIpPort tzNet.IpPortFormat)(Conn)
-	FindConnByTunnelIp(tunnIp tzNet.IpFormat)Conn
-	AllConns()[]Conn
+	FindConnByTunnelIp(tunnIpnet tzNet.IpNetFormat)Conn
+	ForEachConn(do func (conn Conn))
 	AllocateConn(clientIpPort tzNet.IpPort,connWriter io.Writer)(Conn,error)
 }
 

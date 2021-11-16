@@ -11,6 +11,7 @@ log "github.com/pigfall/tzzGoUtil/log/golog"
 type connsStorage struct{
 	writeLock sync.Mutex
 	clientIpPort_Conn map[tzNet.IpPortFormat]Conn
+	clientTunnelIpNet_Conn map[tzNet.IpNetFormat]Conn
 	ipPool *tzNet.IpPool
 }
 
@@ -18,22 +19,24 @@ func newConnStorage(ipPool *tzNet.IpPool)ConnsStorage{
 	return &connsStorage{
 		ipPool :ipPool,
 		clientIpPort_Conn:make(map[tzNet.IpPortFormat]Conn),
+		clientTunnelIpNet_Conn:make(map[tzNet.IpNetFormat]Conn) ,
 	}
 }
 
 
 
-func(this *connsStorage)	PutConn(Conn){
-	panic("TODO")
-}
 func(this *connsStorage)	FindConnByClientIpPort(clientIpPort tzNet.IpPortFormat)(Conn){
-	panic("TODO")
+	return this.clientIpPort_Conn[clientIpPort]
 }
-func(this *connsStorage)	FindConnByTunnelIp(tunnIp tzNet.IpFormat)Conn{
-	panic("TODO")
+
+func(this *connsStorage)	FindConnByTunnelIp(tunnIpNet tzNet.IpNetFormat)Conn{
+	return this.clientTunnelIpNet_Conn[tunnIpNet]
 }
-func(this *connsStorage)	AllConns()[]Conn{
-	panic("TODO")
+
+func(this *connsStorage)	ForEachConn(do func(conn Conn)){
+	for _,conn  := range this.clientIpPort_Conn{
+		do(conn)
+	}
 }
 
 func (this *connsStorage) AllocateConn(clientIpPort tzNet.IpPort,connWriter io.Writer)(Conn,error){
@@ -49,6 +52,7 @@ func (this *connsStorage) AllocateConn(clientIpPort tzNet.IpPort,connWriter io.W
 		}
 		conn = NewConn(clientIpPort,ipNet,connWriter)
 		this.clientIpPort_Conn[clientIpPort.ToIpPortFormat()] = conn
+		this.clientTunnelIpNet_Conn[ipNet.ToIpNetFormat()]= conn
 	}
 	return conn,nil
 }

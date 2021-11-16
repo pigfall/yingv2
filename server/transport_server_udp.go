@@ -74,14 +74,13 @@ func (this *transportServerUDP) Serve(ctx context.Context,tunIfce tzNet.TunIfce,
 
 func (this *transportServerUDP) handleIpPakcet(ipPacket []byte,clientAddr *net.UDPAddr,connStorage ConnsStorage){
 	// TODO route by clientTunnelIp
-	allConns := connStorage.AllConns()
 	log.Info("Writing to all conns")
-	for _,conn  := range allConns{
+	connStorage.ForEachConn(func(conn Conn){
 		err := conn.WriteIpPacket(ipPacket)
 		if err != nil{
 			log.Error(err.Error())
 		}
-	}
+	})
 }
 
 func (this *transportServerUDP) handleAppMsg(clientAddr *net.UDPAddr,appMsgBytes []byte,connStorage ConnsStorage){
