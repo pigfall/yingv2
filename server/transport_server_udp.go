@@ -30,7 +30,6 @@ type transportServerUDP struct{
 }
 
 func (this *transportServerUDP) Prepare(serverAddr *tzNet.IpPort)(cancelFunc func(),err error){
-	// TODO FROM HERE
 	log.Info(fmt.Sprintf("Prepare to listent udpServer at %s",serverAddr.ToString()))
 	udpSock,err := tzNet.UDPListen(serverAddr.IP,serverAddr.Port)
 	if err != nil{
@@ -97,14 +96,14 @@ func (this *transportServerUDP) handleAppMsg(clientAddr *net.UDPAddr,appMsgBytes
 		log.Error(err.Error())
 		return
 	}
-	err = writeToUDPClient(udpSock,resMsgBytes,clientAddr)
+	_,err = writeToUDPClient(udpSock,resMsgBytes,clientAddr)
 	if err != nil{
 		log.Error(err.Error())
 	}
 }
 
-func writeToUDPClient(udpSock *tzNet.UDPSock,bytes []byte,clientAddr *net.UDPAddr)(error){
-	panic("TODO")
+func writeToUDPClient(udpSock *tzNet.UDPSock,bytes []byte,clientAddr *net.UDPAddr)(int,error){
+	return udpSock.WriteToUDP(bytes,clientAddr)
 }
 
 
@@ -126,5 +125,5 @@ func newConnUDPWriter(udpSock *tzNet.UDPSock,remoteAddr *net.UDPAddr)io.Writer{
 }
 
 func (this *connUDPWriter) Write(b []byte)(int,error){
-	return this.udpSock.WriteToUDP(b,this.remoteAddr)
+	return  writeToUDPClient(this.udpSock,b,this.remoteAddr)
 }
