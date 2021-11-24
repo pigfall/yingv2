@@ -61,8 +61,10 @@ func (this *transportServerUDP) Serve(ctx context.Context,tunIfce tzNet.TunIfce,
 		msgType := readData[0]
 		msgData:=readData[1:]
 		if msgType == MSG_TYPE_IP_PACKET{
+			log.Debug(fmt.Sprintf("read ip packet %s",string(msgData)))
 			this.handleIpPakcet(msgData,tunIfce)
 		}else if msgType== MSG_TYPE_APP_MSG{
+			log.Debug(fmt.Sprintf("read app packet %s",string(msgData)))
 			this.handleAppMsg(clientAddr,msgData,connsStorage)
 		}else{
 			panic(fmt.Sprintf("BUG undefined msgType %v",msgType))

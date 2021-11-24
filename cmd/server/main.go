@@ -16,8 +16,19 @@ tzNet "github.com/pigfall/tzzGoUtil/net"
 
 func main() {
 	var confPath string
+	var outputDemoConfig bool
 	flag.StringVar(&confPath,"confPath","","config path")
+	flag.BoolVar(&outputDemoConfig,"demoConfig",false,"output demo config")
 	flag.Parse()
+	if outputDemoConfig{
+		rawCfg := buildDemoConfig()
+		bytes,err := json.Marshal(rawCfg)
+		if err != nil{
+			panic(err)
+		}
+		fmt.Println(string(bytes))
+		os.Exit(0)
+	}
 	if len(confPath) == 0{
 		log.Error("config file path is nil ")
 		flag.Usage()

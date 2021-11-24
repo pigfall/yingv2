@@ -1,5 +1,9 @@
 package proto
 
+import(
+		"encoding/json"
+)
+
 const(
 	ID_C2S_QUERY_IP_NET=1
 	ID_S2C_QUERY_IP_NET=2
@@ -22,11 +26,11 @@ type ResMsg struct{
 }
 
 func Encode(msg interface{})([]byte,error){
-	panic("TODO")
+	return json.Marshal(msg)
 }
 
 func Decode(bytes []byte,msg interface{})error{
-	panic("TODO")
+	return json.Unmarshal(bytes,msg)
 }
 
 
