@@ -17,6 +17,7 @@ type MsgBase struct{
 
 type ReqMsg struct{
 	MsgBase
+	Body []byte `json:"body"`
 }
 
 type ResMsg struct{

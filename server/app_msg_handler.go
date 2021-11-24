@@ -29,6 +29,7 @@ func handleAppMsg(req *proto.ReqMsg,connStorage ConnsStorage,clientIpPort tzNet.
 			res.ErrReason = err.Error()
 			return res
 		}
+		log.Info(fmt.Sprintf("assign clientTunelIp  %s to client %s",conn.ClientTunnelIpNet(),clientIpPort.ToString()))
 		protoBodyMsgIfce = &proto.MsgS2CQueryIp{
 			IpNet:conn.ClientTunnelIpNet(),
 		}

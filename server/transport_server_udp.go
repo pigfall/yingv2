@@ -82,6 +82,7 @@ func (this *transportServerUDP) handleIpPakcet(ipPacket []byte,tunIfce tzNet.Tun
 func (this *transportServerUDP) handleAppMsg(clientAddr *net.UDPAddr,appMsgBytes []byte,connStorage ConnsStorage){
 	var udpSock = this.udpSock
 	var reqMsg = proto.ReqMsg{}
+	log.Debug(fmt.Sprintf("recv app msg %s",string(appMsgBytes)))
 	err :=  proto.Decode(appMsgBytes,&reqMsg)
 	if err != nil{
 		log.Error(err.Error())
@@ -93,7 +94,10 @@ func (this *transportServerUDP) handleAppMsg(clientAddr *net.UDPAddr,appMsgBytes
 		log.Error(err.Error())
 		return
 	}
-	_,err = writeToUDPClient(udpSock,resMsgBytes,clientAddr)
+	bytes := make([]byte,len(resMsgBytes)+1)
+	bytes[0] = MSG_TYPE_APP_MSG
+	copy(bytes[1:],resMsgBytes)
+	_,err = writeToUDPClient(udpSock,bytes,clientAddr)
 	if err != nil{
 		log.Error(err.Error())
 	}
