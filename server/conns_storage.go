@@ -1,6 +1,7 @@
 package server
 
 import(
+	"fmt"
 	"io"
 	"sync"
 tzNet "github.com/pigfall/tzzGoUtil/net"
@@ -66,5 +67,6 @@ func (this *connsStorage) ReleaseConn(clientIpPort tzNet.IpPortFormat){
 		return
 	}
 	conn.Close()
+	log.Info(fmt.Sprintf("Delete conn %v from map",conn.ClientIpPort()))
 	delete( this.clientIpPort_Conn,clientIpPort)
 }

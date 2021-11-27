@@ -158,11 +158,12 @@ func connHearbeadCheck(ctx context.Context,connStorage ConnsStorage){
 		var toRemoves = make([]Conn,0)
 		connStorage.ForEachConn(func(conn Conn){
 			lasthb := conn.GetHeartBeatTime()
-			if lasthb.Sub(now) > (time.Second * 20){
+			if now.Sub(lasthb) > (time.Second * 20){
 				toRemoves = append(toRemoves,conn)
 			}
 		})
 		for _,conn := range toRemoves{
+			log.Info(fmt.Sprintf("Release conn %v",conn.ClientIpPort()))
 			connStorage.ReleaseConn(conn.ClientIpPort())
 		}
 		return nil
