@@ -68,7 +68,7 @@ func (this *transportServerUDP) Serve(ctx context.Context,tunIfce tzNet.TunIfce,
 			log.Debug(fmt.Sprintf("read app packet %s",string(msgData)))
 			this.handleAppMsg(clientAddr,msgData,connsStorage)
 		}else{
-			panic(fmt.Sprintf("BUG undefined msgType %v",msgType))
+			log.Error(fmt.Sprintf("Undefeind msgType %v",msgType))
 		}
 	}
 }
