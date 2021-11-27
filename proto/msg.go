@@ -23,7 +23,7 @@ type ReqMsg struct{
 type ResMsg struct{
 	MsgBase
 	ErrReason string `json:"err_reason"` 
-	Body interface{} `json:"body"`
+	Body string `json:"body"`
 }
 
 func Encode(msg interface{})([]byte,error){

@@ -130,7 +130,7 @@ func onReadFromTunIfce(ctx context.Context,tunIfce tzNet.TunIfce,connsStorage Co
 		// TODO route by clientTunnelIp
 		log.Info("Writing to all conns")
 		connsStorage.ForEachConn(func(conn Conn){
-			err := conn.WriteIpPacket(bufToSend)
+			err := conn.WriteIpPacket(bufToSend[:readNum+1])
 			if err != nil{
 				log.Error(err.Error())
 			}

@@ -2,6 +2,7 @@ package server
 
 import(
 	"io"
+	"encoding/json"
 	"fmt"
 
 	"net"
@@ -39,6 +40,11 @@ func handleAppMsg(req *proto.ReqMsg,connStorage ConnsStorage,clientIpPort tzNet.
 		panic(err)
 	}
 
-	res.Body =protoBodyMsgIfce
+	bodyBytes,err := json.Marshal(protoBodyMsgIfce)
+	if err != nil{
+		panic(err)
+	}
+
+	res.Body =string(bodyBytes)
 	return res
 }

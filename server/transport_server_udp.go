@@ -57,6 +57,7 @@ func (this *transportServerUDP) Serve(ctx context.Context,tunIfce tzNet.TunIfce,
 			log.Error(err.Error())
 			return err
 		}
+		log.Debug(fmt.Sprintf("read udp packet from %s",clientAddr.String()))
 		readData := buf[:readNum]
 		msgType := readData[0]
 		msgData:=readData[1:]
@@ -97,6 +98,7 @@ func (this *transportServerUDP) handleAppMsg(clientAddr *net.UDPAddr,appMsgBytes
 	bytes := make([]byte,len(resMsgBytes)+1)
 	bytes[0] = MSG_TYPE_APP_MSG
 	copy(bytes[1:],resMsgBytes)
+	log.Debug(string(bytes))
 	_,err = writeToUDPClient(udpSock,bytes,clientAddr)
 	if err != nil{
 		log.Error(err.Error())
@@ -104,6 +106,10 @@ func (this *transportServerUDP) handleAppMsg(clientAddr *net.UDPAddr,appMsgBytes
 }
 
 func writeToUDPClient(udpSock *tzNet.UDPSock,bytes []byte,clientAddr *net.UDPAddr)(int,error){
+//	if len(bytes) > 1000{
+//		log.Debug(fmt.Sprintf("write udp length %d", len(bytes)))
+//		panic("here")
+//	}
 	return udpSock.WriteToUDP(bytes,clientAddr)
 }
 
