@@ -39,7 +39,7 @@ func(this *connsStorage)	ForEachConn(do func(conn Conn)){
 	}
 }
 
-func (this *connsStorage) AllocateConn(clientIpPort tzNet.IpPort,connWriter io.Writer)(Conn,error){
+func (this *connsStorage) AllocateConn(clientIpPort tzNet.IpPort,connWriter io.WriteCloser)(Conn,error){
 	this.writeLock.Lock()
 	defer this.writeLock.Unlock()
 	var conn Conn
@@ -51,8 +51,20 @@ func (this *connsStorage) AllocateConn(clientIpPort tzNet.IpPort,connWriter io.W
 			return nil,err
 		}
 		conn = NewConn(clientIpPort,ipNet,connWriter)
+		conn.UpdateHearbeat()
 		this.clientIpPort_Conn[clientIpPort.ToIpPortFormat()] = conn
 		this.clientTunnelIpNet_Conn[ipNet.ToIpNetFormat()]= conn
 	}
 	return conn,nil
+}
+
+func (this *connsStorage) ReleaseConn(clientIpPort tzNet.IpPortFormat){
+	this.writeLock.Lock()
+	defer this.writeLock.Unlock()
+	conn := this.clientIpPort_Conn[clientIpPort]
+	if conn == nil {
+		return
+	}
+	conn.Close()
+	delete( this.clientIpPort_Conn,clientIpPort)
 }

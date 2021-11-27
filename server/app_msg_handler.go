@@ -18,7 +18,7 @@ func handleUDPAppMsg(req *proto.ReqMsg,connsStorage ConnsStorage,clientAddr *net
 }
 
 
-func handleAppMsg(req *proto.ReqMsg,connStorage ConnsStorage,clientIpPort tzNet.IpPort,connWriter io.Writer)(res *proto.ResMsg){
+func handleAppMsg(req *proto.ReqMsg,connStorage ConnsStorage,clientIpPort tzNet.IpPort,connWriter io.WriteCloser)(res *proto.ResMsg){
 	res = &proto.ResMsg{}
 	var protoBodyMsgIfce interface{}
 	switch req.Id{
@@ -34,16 +34,31 @@ func handleAppMsg(req *proto.ReqMsg,connStorage ConnsStorage,clientIpPort tzNet.
 		protoBodyMsgIfce = &proto.MsgS2CQueryIp{
 			IpNet:conn.ClientTunnelIpNet(),
 		}
+	case proto.ID_C2S_HEARTBEAT:
+		res.Id = proto.ID_S2C_HEARTBEAT
+		conn := connStorage.FindConnByClientIpPort(clientIpPort.ToIpPortFormat())
+		if conn!=nil{
+			conn.UpdateHearbeat()
+		}else{
+			// not found connection ,no reponse
+			return nil
+		}
 	default:
 		err := fmt.Errorf("Undefined appMsgReqId %v",req.Id)
 		log.Error(err.Error())
 		panic(err)
 	}
 
-	bodyBytes,err := json.Marshal(protoBodyMsgIfce)
-	if err != nil{
-		panic(err)
+	var bodyBytes []byte
+	if protoBodyMsgIfce != nil{
+		var err error
+		bodyBytes,err = json.Marshal(protoBodyMsgIfce)
+		if err != nil{
+			log.Error(err.Error())
+			return nil
+		}
 	}
+
 
 	res.Body =string(bodyBytes)
 	return res

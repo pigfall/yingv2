@@ -2,10 +2,12 @@ package server
 
 import(
 	"reflect"
+	"time"
 tzNet "github.com/pigfall/tzzGoUtil/net"
 	"context"
 	"fmt"
-"github.com/pigfall/tzzGoUtil/funcs"
+	"github.com/pigfall/tzzGoUtil/funcs"
+	ctxHelper "github.com/pigfall/tzzGoUtil/ctx"
 
 "github.com/pigfall/tzzGoUtil/async"
 	log "github.com/pigfall/tzzGoUtil/log/golog"
@@ -13,6 +15,7 @@ tzNet "github.com/pigfall/tzzGoUtil/net"
 
 var (
 		JOB_ON_READ_TUNIFCE = reflect.TypeOf(onReadFromTunIfce).String()
+		JOB_CONN_HEARBEAT_CHECK = reflect.TypeOf(connHearbeadCheck).String()
 		JOB_TRANSPORT_SERVER_SERVE = reflect.TypeOf(TransportServer.Serve).String()
 )
 
@@ -81,6 +84,17 @@ func Serve(ctx context.Context,serveIpPort *tzNet.IpPort,transportServerBuilder 
 	)
 	// >
 
+	// < hearbeat check for all connections
+	asyncCtrl.AsyncDo(
+		ctx,
+		JOB_CONN_HEARBEAT_CHECK,
+		func(ctx context.Context){
+			connHearbeadCheck(ctx,connsStorage)
+			log.Info(fmt.Sprintf("%s func over ",reflect.TypeOf(connHearbeadCheck).String(),))
+		},
+	)
+	// >
+
 	// <
 	transportServer := transportServerBuilder.BuildTransportServer()
 	transportServerCancelFunc,err := transportServer.Prepare(serveIpPort)
@@ -136,4 +150,21 @@ func onReadFromTunIfce(ctx context.Context,tunIfce tzNet.TunIfce,connsStorage Co
 			}
 		})
 	}
+}
+
+func connHearbeadCheck(ctx context.Context,connStorage ConnsStorage){
+	ctxHelper.TickerDo(ctx,time.Second*10,func()error{
+		now := time.Now()
+		var toRemoves = make([]Conn,0)
+		connStorage.ForEachConn(func(conn Conn){
+			lasthb := conn.GetHeartBeatTime()
+			if lasthb.Sub(now) > (time.Second * 20){
+				toRemoves = append(toRemoves,conn)
+			}
+		})
+		for _,conn := range toRemoves{
+			connStorage.ReleaseConn(conn.ClientIpPort())
+		}
+		return nil
+	})
 }

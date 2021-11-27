@@ -101,7 +101,7 @@ func (this *transportServerWebsocket) serveConn(ctx context.Context,wsConn *ws.C
 	}
 }
 
-func handleWebsocketAppMsgType(reqMsg *proto.ReqMsg,wsConn *ws.Conn,connWriter io.Writer,connsStorage ConnsStorage,clientAddr net.Addr){
+func handleWebsocketAppMsgType(reqMsg *proto.ReqMsg,wsConn *ws.Conn,connWriter io.WriteCloser,connsStorage ConnsStorage,clientAddr net.Addr){
 	clientIpPort,err := tzNet.IpPortFromString(clientAddr.String())
 	if err != nil{
 		err = fmt.Errorf("parse clientIpPort failed %w",err)
@@ -133,6 +133,10 @@ type connWebsocketWriter struct{
 func (this *connWebsocketWriter) Write(b []byte)(int,error){
 	err := this.conn.WriteMessage(ws.BinaryMessage,b)
 	return len(b),err
+}
+
+func (this *connWebsocketWriter) Close() error{
+	return this.conn.Close()
 }
 
 

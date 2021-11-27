@@ -95,6 +95,10 @@ func (this *transportServerUDP) handleAppMsg(clientAddr *net.UDPAddr,appMsgBytes
 		log.Error(err.Error())
 		return
 	}
+	if res == nil{
+		// no res
+		return 
+	}
 	bytes := make([]byte,len(resMsgBytes)+1)
 	bytes[0] = MSG_TYPE_APP_MSG
 	copy(bytes[1:],resMsgBytes)
@@ -124,7 +128,7 @@ type connUDPWriter struct{
 	remoteAddr *net.UDPAddr
 }
 
-func newConnUDPWriter(udpSock *tzNet.UDPSock,remoteAddr *net.UDPAddr)io.Writer{
+func newConnUDPWriter(udpSock *tzNet.UDPSock,remoteAddr *net.UDPAddr)io.WriteCloser{
 	return &connUDPWriter{
 		udpSock:udpSock,
 		remoteAddr:remoteAddr,
@@ -133,4 +137,9 @@ func newConnUDPWriter(udpSock *tzNet.UDPSock,remoteAddr *net.UDPAddr)io.Writer{
 
 func (this *connUDPWriter) Write(b []byte)(int,error){
 	return  writeToUDPClient(this.udpSock,b,this.remoteAddr)
+}
+
+func (this *connUDPWriter) Close() error{
+	// do nothing
+	return nil
 }
